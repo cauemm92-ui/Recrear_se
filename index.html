@@ -165,6 +165,22 @@
   .contract-box .payment-block p { margin: 0 0 3px; }
   .contract-box .sign-line { margin-top: 34px; text-align: left; }
 
+  .sig-field {
+    border: 1.5px solid #e3ddd1; border-top: none; border-radius: 0 0 10px 10px;
+    background: #fffdfa; padding: 4px 44px 28px;
+  }
+  .sig-field-label {
+    font-family: 'Lustria', serif; font-size: 11px; letter-spacing: .05em; text-transform: uppercase;
+    color: #7ea3a7; padding-top: 18px; margin-bottom: 10px;
+  }
+  .sig-pad-wrap { border: 1px solid #cfc9ba; background: #fbf9f5; border-radius: 6px; }
+  .sig-field canvas { display: block; width: 100%; height: 140px; touch-action: none; }
+  .sig-line { border-top: 1.5px solid #241f1a; margin-top: 2px; }
+  .sig-caption {
+    font-family: 'Lustria', serif; font-size: 10.5px; color: #9a9384; margin-top: 6px;
+  }
+  .sig-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+
   .adjust-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
 
   @page { size: A4; margin: 20mm 18mm; }
@@ -179,6 +195,8 @@
     }
     .contract-box h2 { break-after: avoid; }
     .contract-box .party-block, .contract-box .payment-block { break-inside: avoid; }
+    .sig-field { border: none; padding: 0; margin-top: 20px; }
+    .sig-pad-wrap { border: none; background: #fff; }
   }
 
   .btn {
@@ -476,10 +494,8 @@
     <p class="sub">Revise os dados abaixo e assine para confirmar o seu evento.</p>
   </div>
 
-  <div class="card">
-    <img id="clientContractLogo" style="width:90px; display:block; margin:0 auto 20px;" alt="Recrear-se">
-    <div class="contract-box" id="clientContractBox"></div>
-  </div>
+  <img id="clientContractLogo" style="width:90px; display:block; margin:0 auto 20px;" alt="Recrear-se">
+  <div class="contract-box" id="clientContractBox" style="border-bottom:none; border-radius:10px 10px 0 0;"></div>
 
   <div class="sig-field" id="clientSigWrap">
     <div class="sig-field-label">Assinatura do(a) contratante</div>
