@@ -534,42 +534,43 @@
 <script>
 // ─── Tabela de preços ───
 // tier: [até 10, 11 a 20, 21 a 30] · perChild: valor por criança (usa qtd global) · perChildCustom: valor por criança (usa campo próprio do item) · flat: valor fixo
+// duracao / duracaoTier: código tipo '2h' ou '2h30' (convertido por extenso na hora) · recreadores / recreadoresTier: nº de recreadores (ou string p/ casos especiais como monitor)
 var PRECOS_ANIVERSARIO = {
-  'Bronze': { tier: [300, 400, 500] },
-  'Prata': { tier: [350, 500, 650] },
-  'Ouro': { tier: [500, 800, 1100] },
-  'Pintura até 10 crianças': { flat: 200 },
-  'Pintura 11 a 20 crianças': { flat: 300 },
-  'Pintura 21 a 30 crianças': { flat: 400 },
-  'Tatuagem Glitter até 10 crianças': { flat: 250 },
-  'Tatuagem Glitter 11 a 20 crianças': { flat: 350 },
-  'Tatuagem Glitter 21 a 30 crianças': { flat: 450 },
-  'Escultura com Balões até 10 crianças': { flat: 250 },
-  'Escultura com Balões 11 a 20 crianças': { flat: 350 },
-  'Escultura com Balões 21 a 30 crianças': { flat: 450 },
-  'Recreação 1 hora': { flat: 250 },
-  'Recreação 2 horas': { flat: 500 },
-  'Recreação 3 horas': { flat: 750 },
+  'Bronze': { tier: [300, 400, 500], duracaoTier: ['2h', '2h30', '3h'], recreadores: 1 },
+  'Prata': { tier: [350, 500, 650], duracaoTier: ['2h', '2h30', '3h'], recreadores: 2 },
+  'Ouro': { tier: [500, 800, 1100], duracaoTier: ['2h30', '3h', '3h30'], recreadores: 2 },
+  'Pintura até 10 crianças': { flat: 200, duracao: '2h', recreadores: 1 },
+  'Pintura 11 a 20 crianças': { flat: 300, duracao: '2h30', recreadores: 1 },
+  'Pintura 21 a 30 crianças': { flat: 400, duracao: '3h', recreadores: 1 },
+  'Tatuagem Glitter até 10 crianças': { flat: 250, duracao: '2h', recreadores: 1 },
+  'Tatuagem Glitter 11 a 20 crianças': { flat: 350, duracao: '2h30', recreadores: 1 },
+  'Tatuagem Glitter 21 a 30 crianças': { flat: 450, duracao: '3h', recreadores: 1 },
+  'Escultura com Balões até 10 crianças': { flat: 250, duracao: '2h', recreadores: 1 },
+  'Escultura com Balões 11 a 20 crianças': { flat: 350, duracao: '2h30', recreadores: 1 },
+  'Escultura com Balões 21 a 30 crianças': { flat: 450, duracao: '3h', recreadores: 1 },
+  'Recreação 1 hora': { flat: 250, duracao: '1h', recreadores: 2 },
+  'Recreação 2 horas': { flat: 500, duracao: '2h', recreadores: 2 },
+  'Recreação 3 horas': { flat: 750, duracao: '3h', recreadores: 2 },
   'Oficina de Miçangas': { perChildCustom: 15, min: 15 },
   'Estação de Slime Premium': { perChildCustom: 20, min: 15 },
   'Oficina de Ecobag': { perChildCustom: 30, min: 15 },
   'Oficina de Cupcake': { perChildCustom: 40, min: 15 },
-  'Essencial': { perChildCustom: 40, min: 10 },
-  'Encanto': { perChildCustom: 50, min: 10 },
-  'Experiência': { perChildCustom: 70, min: 10 },
+  'Essencial': { perChildCustom: 40, min: 10, duracao: '1h', recreadores: 2 },
+  'Encanto': { perChildCustom: 50, min: 10, duracao: '1h30', recreadores: 2 },
+  'Experiência': { perChildCustom: 70, min: 10, duracao: '2h', recreadores: 3 },
   'Camarim Fashion': { perChildCustom: 20, min: 15 },
-  'Castelinho Inflável Branco Luxo': { flat: 600, note: '4 horas — hora adicional R$ 100' }
+  'Castelinho Inflável Branco Luxo': { flat: 600, note: '4 horas — hora adicional R$ 100', duracao: '4h', recreadoresLabel: '1 (um) monitor(a)' }
 };
 
 var PRECOS_CASAMENTO = {
-  'Bronze': { flat: 1150, note: '4 horas, até 30 crianças' },
-  'Prata': { flat: 1350, note: '4 horas, até 30 crianças' },
-  'Ouro': { flat: 1650, note: '4 horas, até 30 crianças' },
+  'Bronze': { flat: 1150, note: '4 horas, até 30 crianças', duracao: '4h', recreadores: 3 },
+  'Prata': { flat: 1350, note: '4 horas, até 30 crianças', duracao: '4h', recreadores: 3 },
+  'Ouro': { flat: 1650, note: '4 horas, até 30 crianças', duracao: '4h', recreadores: 4 },
   'Oficina de Miçangas': { flat: 450, note: 'até 30 crianças' },
   'Oficina de Slime': { flat: 600, note: 'até 30 crianças' },
   'Oficina de Ecobag': { flat: 900, note: 'até 30 crianças' },
   'Oficina de Cupcake': { flat: 1200, note: 'até 30 crianças' },
-  'Castelinho Inflável Branco Luxo': { flat: 600, note: '4 horas — hora adicional R$ 100' }
+  'Castelinho Inflável Branco Luxo': { flat: 600, note: '4 horas — hora adicional R$ 100', duracao: '4h', recreadoresLabel: '1 (um) monitor(a)' }
 };
 
 function tierIndex(qtd) {
@@ -797,6 +798,66 @@ function valorPorExtenso(valor) {
   return str;
 }
 
+// "duas horas", não "dois horas" — só 1 e 2 mudam de gênero em português
+function numeroPorExtensoFeminino(n) {
+  if (n === 1) return 'uma';
+  if (n === 2) return 'duas';
+  return numeroPorExtenso(n);
+}
+
+// converte um código tipo '2h' ou '2h30' em "2 (duas) horas" / "2 (duas) horas e 30 (trinta) minutos"
+function formatarDuracaoExtenso(codigo) {
+  var m = /^(\d+)h(\d+)?$/.exec(codigo || '');
+  if (!m) return codigo || '';
+  var h = parseInt(m[1], 10);
+  var min = m[2] ? parseInt(m[2], 10) : 0;
+  var str = h + ' (' + numeroPorExtensoFeminino(h) + ') ' + (h === 1 ? 'hora' : 'horas');
+  if (min > 0) str += ' e ' + min + ' (' + numeroPorExtenso(min) + ') minutos';
+  return str;
+}
+
+function duracaoParaMinutos(codigo) {
+  var m = /^(\d+)h(\d+)?$/.exec(codigo || '');
+  if (!m) return 0;
+  return parseInt(m[1], 10) * 60 + (m[2] ? parseInt(m[2], 10) : 0);
+}
+
+function formatarRecreadoresExtenso(n) {
+  return n + ' (' + numeroPorExtenso(n) + ') ' + (n === 1 ? 'recreador' : 'recreadores');
+}
+
+// olha os pacotes marcados e sugere duração (a maior entre eles) e recreadores (o maior número exigido)
+function calcularDuracaoRecreadoresSugeridos() {
+  var tipo = document.getElementById('rTipoEvento').value;
+  var qtd = parseInt(document.getElementById('rCriancas').value, 10) || 0;
+  var tabela = tipo === 'casamento' ? PRECOS_CASAMENTO : PRECOS_ANIVERSARIO;
+
+  var maiorMinutos = 0, melhorCodigoDuracao = null;
+  var maiorRecreadores = 0, melhorLabelRecreadores = null;
+
+  pacotesSelecionados.forEach(function (nome) {
+    var def = tabela[nome];
+    if (!def) return;
+
+    var codigoDuracao = def.duracao || (def.duracaoTier ? def.duracaoTier[tierIndex(qtd) === -1 ? 2 : tierIndex(qtd)] : null);
+    if (codigoDuracao) {
+      var min = duracaoParaMinutos(codigoDuracao);
+      if (min > maiorMinutos) { maiorMinutos = min; melhorCodigoDuracao = codigoDuracao; }
+    }
+
+    if (def.recreadoresLabel) {
+      if (maiorRecreadores === 0) melhorLabelRecreadores = def.recreadoresLabel; // não dá pra comparar número com label especial
+    } else if (def.recreadores) {
+      if (def.recreadores > maiorRecreadores) { maiorRecreadores = def.recreadores; melhorLabelRecreadores = null; }
+    }
+  });
+
+  return {
+    duracao: melhorCodigoDuracao ? formatarDuracaoExtenso(melhorCodigoDuracao) : '',
+    recreadores: melhorLabelRecreadores || (maiorRecreadores > 0 ? formatarRecreadoresExtenso(maiorRecreadores) : '')
+  };
+}
+
 var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 function dataAssinaturaExtenso() {
   var d = new Date();
@@ -1008,14 +1069,9 @@ function montarContrato() {
 }
 
 document.getElementById('continueBtn').addEventListener('click', function () {
-  var tipo = document.getElementById('rTipoEvento').value;
-  // pré-preenche duração/recreadores com o padrão do modelo, só na primeira vez que abrir a etapa 3
-  if (!document.getElementById('rDuracao').value) {
-    document.getElementById('rDuracao').value = tipo === 'casamento' ? '6 (seis) horas' : '2 (duas) horas';
-  }
-  if (!document.getElementById('rRecreadores').value) {
-    document.getElementById('rRecreadores').value = '2 (dois)';
-  }
+  var sugestao = calcularDuracaoRecreadoresSugeridos();
+  document.getElementById('rDuracao').value = sugestao.duracao || '[duração não definida no catálogo — preencher manualmente]';
+  document.getElementById('rRecreadores').value = sugestao.recreadores || '[recreadores não definido no catálogo — preencher manualmente]';
   montarContrato();
   document.getElementById('step2').style.display = 'none';
   document.getElementById('step3').style.display = 'block';
