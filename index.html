@@ -532,6 +532,46 @@
 </div>
 
 <script>
+// ─── Integração com Google Sheets ───
+// Cole aqui a URL do Apps Script depois de publicar (veja instruções no chat / README).
+var SHEETS_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbykoU8YWdwh6tLhj10VfbaxwkKgbtOwMFfC5g6oGRt56jw52RVaPUjDhkBp4ab4cvn5/exec';
+
+var contratoIdAtual = null;
+
+function gerarContratoId() {
+  return 'RC-' + Date.now().toString(36).toUpperCase();
+}
+
+function enviarParaPlanilha(status, dadosExtra) {
+  if (!SHEETS_WEBHOOK_URL || SHEETS_WEBHOOK_URL.indexOf('COLE_AQUI') !== -1) return; // ainda não configurado
+
+  var payload = Object.assign({
+    id: contratoIdAtual,
+    status: status,
+    tipo: (dadosExtra && dadosExtra.tipo) || document.getElementById('rTipoEvento').value,
+    nome: (dadosExtra && dadosExtra.nome) || document.getElementById('rNome').value,
+    cpf: (dadosExtra && dadosExtra.cpf) || document.getElementById('rCpf').value,
+    contato: (dadosExtra && dadosExtra.contato) || document.getElementById('rCelular').value,
+    enderecoContratante: (dadosExtra && dadosExtra.enderecoContratante) || document.getElementById('rEnderecoContratante').value,
+    enderecoFesta: (dadosExtra && dadosExtra.enderecoFesta) || document.getElementById('rEndereco').value,
+    dataFesta: (dadosExtra && dadosExtra.data) || document.getElementById('rData').value,
+    horario: (dadosExtra && dadosExtra.horario) || document.getElementById('rInicio').value,
+    qtdCriancas: (dadosExtra && dadosExtra.qtdCriancas) || document.getElementById('rCriancas').value,
+    pacotes: (dadosExtra && dadosExtra.pacotes) || pacotesSelecionados.join(', '),
+    duracao: (dadosExtra && dadosExtra.duracao) || document.getElementById('rDuracao').value,
+    recreadores: (dadosExtra && dadosExtra.recreadores) || document.getElementById('rRecreadores').value,
+    valorTotal: (dadosExtra && dadosExtra.valorTotal !== undefined) ? dadosExtra.valorTotal : totalGeral,
+    taxa: (dadosExtra && dadosExtra.taxa !== undefined) ? dadosExtra.taxa : (window.taxaAtual || 0)
+  }, {});
+
+  fetch(SHEETS_WEBHOOK_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  }).catch(function (err) { console.error('Falha ao enviar pra planilha:', err); });
+}
+
 // ─── Tabela de preços ───
 // tier: [até 10, 11 a 20, 21 a 30] · perChild: valor por criança (usa qtd global) · perChildCustom: valor por criança (usa campo próprio do item) · flat: valor fixo
 // duracao / duracaoTier: código tipo '2h' ou '2h30' (convertido por extenso na hora) · recreadores / recreadoresTier: nº de recreadores (ou string p/ casos especiais como monitor)
@@ -1073,6 +1113,8 @@ document.getElementById('continueBtn').addEventListener('click', function () {
   document.getElementById('rDuracao').value = sugestao.duracao || '[duração não definida no catálogo — preencher manualmente]';
   document.getElementById('rRecreadores').value = sugestao.recreadores || '[recreadores não definido no catálogo — preencher manualmente]';
   montarContrato();
+  contratoIdAtual = gerarContratoId();
+  enviarParaPlanilha('Gerado');
   document.getElementById('step2').style.display = 'none';
   document.getElementById('step3').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1107,6 +1149,7 @@ function onlyDigits(s) { return (s || '').replace(/\D/g, ''); }
 
 document.getElementById('gerarLinkBtn').addEventListener('click', function () {
   var payload = {
+    id: contratoIdAtual,
     tipo: document.getElementById('rTipoEvento').value,
     nome: document.getElementById('rNome').value,
     cpf: document.getElementById('rCpf').value,
@@ -1251,6 +1294,24 @@ function mostrarModoCliente(payload) {
     document.getElementById('clientAceiteCheck').parentElement.style.display = 'none';
     document.getElementById('clientAceitarBtn').style.display = 'none';
     document.getElementById('clientSucesso').style.display = 'block';
+
+    contratoIdAtual = payload.id;
+    enviarParaPlanilha('Aceito', {
+      tipo: payload.tipo,
+      nome: payload.nome,
+      cpf: payload.cpf,
+      contato: payload.contato,
+      enderecoContratante: payload.enderecoContratante,
+      enderecoFesta: payload.enderecoFesta,
+      data: payload.data,
+      horario: payload.horario,
+      qtdCriancas: payload.qtdCriancasNum,
+      pacotes: (payload.atividades || []).join(', '),
+      duracao: payload.duracao,
+      recreadores: payload.recreadores,
+      valorTotal: payload.valorTotal,
+      taxa: payload.taxa
+    });
 
     var tel = '5512992264586'; // WhatsApp da Recrear-se
     var msg = 'Olá! Sou ' + payload.nome + ' e acabei de assinar o contrato do meu evento (' + payload.data + '). Confirmando o aceite!';
