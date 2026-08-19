@@ -273,6 +273,7 @@
         <option value="">Selecione</option>
         <option value="festas">Aniversário</option>
         <option value="casamento">Espaço Kids (Casamento / 15 anos / Corporativo)</option>
+        <option value="eventoAberto">Evento Aberto</option>
       </select>
     </div>
 
@@ -360,6 +361,37 @@
         <div class="pkg-group-label">Recrear-se Play</div>
         <div class="pkg-options" data-group="pacoteFestas">
           <label class="pkg-chip"><input type="checkbox" name="pacoteFestas" value="Castelinho Inflável Branco Luxo">Castelinho Inflável Branco Luxo</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" id="wrapPacoteEventoAberto" style="display:none;">
+      <label>Pacotes escolhidos <span style="font-weight:400;color:#8c8779;">(pode marcar mais de um)</span></label>
+
+      <div class="pkg-group">
+        <div class="pkg-group-label">Pintura Facial</div>
+        <div class="pkg-options" data-group="pacoteEventoAberto">
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Pintura Facial 2h">Pintura Facial 2h</label>
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Pintura Facial 3h">Pintura Facial 3h</label>
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Pintura Facial 4h">Pintura Facial 4h</label>
+        </div>
+      </div>
+
+      <div class="pkg-group">
+        <div class="pkg-group-label">Escultura com Balões <span class="qty-label">(adicional)</span></div>
+        <div class="pkg-options" data-group="pacoteEventoAberto">
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Escultura com Balões 2h">Escultura com Balões 2h</label>
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Escultura com Balões 3h">Escultura com Balões 3h</label>
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Escultura com Balões 4h">Escultura com Balões 4h</label>
+        </div>
+      </div>
+
+      <div class="pkg-group">
+        <div class="pkg-group-label">Combo (Pintura + Balões)</div>
+        <div class="pkg-options" data-group="pacoteEventoAberto">
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Combo (Pintura + Balões) 2h">Combo 2h</label>
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Combo (Pintura + Balões) 3h">Combo 3h</label>
+          <label class="pkg-chip"><input type="checkbox" name="pacoteEventoAberto" value="Combo (Pintura + Balões) 4h">Combo 4h</label>
         </div>
       </div>
     </div>
@@ -613,6 +645,30 @@ var PRECOS_CASAMENTO = {
   'Castelinho Inflável Branco Luxo': { flat: 600, note: '4 horas — hora adicional R$ 100', duracao: '4h', recreadoresLabel: '1 (um) monitor(a)' }
 };
 
+// pacote fechado, cobrado por duração (não por quantidade de criança) — pra eventos públicos
+var PRECOS_EVENTO_ABERTO = {
+  'Pintura Facial 2h': { flat: 350, duracao: '2h', recreadores: 1 },
+  'Pintura Facial 3h': { flat: 450, duracao: '3h', recreadores: 1 },
+  'Pintura Facial 4h': { flat: 550, duracao: '4h', recreadores: 1 },
+  'Escultura com Balões 2h': { flat: 400, duracao: '2h', recreadores: 1 },
+  'Escultura com Balões 3h': { flat: 500, duracao: '3h', recreadores: 1 },
+  'Escultura com Balões 4h': { flat: 600, duracao: '4h', recreadores: 1 },
+  'Combo (Pintura + Balões) 2h': { flat: 650, duracao: '2h', recreadores: 2 },
+  'Combo (Pintura + Balões) 3h': { flat: 850, duracao: '3h', recreadores: 2 },
+  'Combo (Pintura + Balões) 4h': { flat: 1000, duracao: '4h', recreadores: 2 }
+};
+
+function tabelaDoTipo(tipo) {
+  if (tipo === 'casamento') return PRECOS_CASAMENTO;
+  if (tipo === 'eventoAberto') return PRECOS_EVENTO_ABERTO;
+  return PRECOS_ANIVERSARIO;
+}
+function grupoDoTipo(tipo) {
+  if (tipo === 'casamento') return 'pacoteCasamento';
+  if (tipo === 'eventoAberto') return 'pacoteEventoAberto';
+  return 'pacoteFestas';
+}
+
 function tierIndex(qtd) {
   if (qtd <= 10) return 0;
   if (qtd <= 20) return 1;
@@ -655,9 +711,11 @@ document.getElementById('rTipoEvento').addEventListener('change', function () {
   var tipo = this.value;
   var wrapFestas = document.getElementById('wrapPacoteFestas');
   var wrapCasamento = document.getElementById('wrapPacoteCasamento');
+  var wrapEventoAberto = document.getElementById('wrapPacoteEventoAberto');
 
   wrapFestas.style.display = tipo === 'festas' ? 'block' : 'none';
   wrapCasamento.style.display = tipo === 'casamento' ? 'block' : 'none';
+  wrapEventoAberto.style.display = tipo === 'eventoAberto' ? 'block' : 'none';
 
   // desmarca os chips do grupo que ficou escondido
   if (tipo !== 'festas') {
@@ -670,6 +728,11 @@ document.getElementById('rTipoEvento').addEventListener('change', function () {
   }
   if (tipo !== 'casamento') {
     wrapCasamento.querySelectorAll('input[type=checkbox]').forEach(function (c) {
+      c.checked = false; c.closest('.pkg-chip').classList.remove('checked');
+    });
+  }
+  if (tipo !== 'eventoAberto') {
+    wrapEventoAberto.querySelectorAll('input[type=checkbox]').forEach(function (c) {
       c.checked = false; c.closest('.pkg-chip').classList.remove('checked');
     });
   }
@@ -699,8 +762,8 @@ var pacotesSelecionados = [];
 function montarResumo() {
   var tipo = document.getElementById('rTipoEvento').value;
   var qtd = parseInt(document.getElementById('rCriancas').value, 10) || 0;
-  var tabela = tipo === 'casamento' ? PRECOS_CASAMENTO : PRECOS_ANIVERSARIO;
-  var nomeGrupo = tipo === 'casamento' ? 'pacoteCasamento' : 'pacoteFestas';
+  var tabela = tabelaDoTipo(tipo);
+  var nomeGrupo = grupoDoTipo(tipo);
   var marcados = Array.from(document.querySelectorAll('input[name="' + nomeGrupo + '"]:checked')).map(function (c) { return c.value; });
   pacotesSelecionados = marcados;
 
@@ -870,7 +933,7 @@ function formatarRecreadoresExtenso(n) {
 function calcularDuracaoRecreadoresSugeridos() {
   var tipo = document.getElementById('rTipoEvento').value;
   var qtd = parseInt(document.getElementById('rCriancas').value, 10) || 0;
-  var tabela = tipo === 'casamento' ? PRECOS_CASAMENTO : PRECOS_ANIVERSARIO;
+  var tabela = tabelaDoTipo(tipo);
 
   var maiorMinutos = 0, melhorCodigoDuracao = null;
   var maiorRecreadores = 0, melhorLabelRecreadores = null;
