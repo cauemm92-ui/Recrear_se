@@ -509,6 +509,11 @@
       <div id="extraList"></div>
       <button type="button" class="add-extra-btn" id="addExtraBtn">+ Adicionar valor</button>
 
+      <div class="section-title">Desconto <span class="qty-label">(opcional)</span></div>
+      <div class="field" style="margin-bottom:18px;">
+        <input type="text" id="rDesconto" placeholder="R$ 0,00">
+      </div>
+
       <div class="total-box">
         <span class="total-label">Total estimado</span>
         <span class="total-value" id="totalValue">R$ 0,00</span>
@@ -645,7 +650,8 @@ function enviarParaPlanilha(status, dadosExtra) {
     duracao: (dadosExtra && dadosExtra.duracao) || document.getElementById('rDuracao').value,
     recreadores: (dadosExtra && dadosExtra.recreadores) || document.getElementById('rRecreadores').value,
     valorTotal: (dadosExtra && dadosExtra.valorTotal !== undefined) ? dadosExtra.valorTotal : totalGeral,
-    taxa: (dadosExtra && dadosExtra.taxa !== undefined) ? dadosExtra.taxa : (window.taxaAtual || 0)
+    taxa: (dadosExtra && dadosExtra.taxa !== undefined) ? dadosExtra.taxa : (window.taxaAtual || 0),
+    desconto: (dadosExtra && dadosExtra.desconto !== undefined) ? dadosExtra.desconto : (window.descontoAtual || 0)
   }, {});
 
   fetch(SHEETS_WEBHOOK_URL, {
@@ -860,9 +866,14 @@ function atualizarTotal() {
     extras += parseFloat((inp.value || '0').replace(',', '.')) || 0;
   });
 
-  document.getElementById('totalValue').textContent = formatBRL(itemTotal + taxa + extras);
-  totalGeral = itemTotal + taxa + extras;
+  var descontoInformado = parseFloat((document.getElementById('rDesconto').value || '0').replace(',', '.')) || 0;
+  var subtotal = itemTotal + taxa + extras;
+  var desconto = Math.min(Math.max(descontoInformado, 0), subtotal); // nunca deixa o total ficar negativo
+
+  document.getElementById('totalValue').textContent = formatBRL(subtotal - desconto);
+  totalGeral = subtotal - desconto;
   window.taxaAtual = taxa;
+  window.descontoAtual = desconto;
 }
 
 function addExtraRow() {
@@ -894,6 +905,7 @@ document.querySelectorAll('input[name="rTaxa"]').forEach(function (radio) {
 });
 document.getElementById('rTaxaOutra').addEventListener('input', atualizarTotal);
 document.querySelector('.taxa-opt[data-taxa="sjc"]').classList.add('checked');
+document.getElementById('rDesconto').addEventListener('input', atualizarTotal);
 
 // ─── Indicador de etapas ───
 function setActiveStep(n) {
@@ -1095,7 +1107,7 @@ function gerarContratoAniversario(d) {
 '<p>Comparecer ao local com no mínimo 15 (quinze) minutos de antecedência para organização. Em caso de atraso por parte da CONTRATADA, o tempo será compensado ao final do evento.</p>' +
 
 '<h2>Cláusula Quinta – Da Remuneração</h2>' +
-'<p>O valor total dos serviços é de <strong>R$ ' + d.valorTotal + '</strong> (' + d.valorExtenso + '), incluindo R$ ' + d.taxa + ' de taxa de locomoção.</p>' +
+'<p>O valor total dos serviços é de <strong>R$ ' + d.valorTotal + '</strong> (' + d.valorExtenso + '), incluindo R$ ' + d.taxa + ' de taxa de locomoção.' + d.descontoTxt + '</p>' +
 '<p>Forma de pagamento:</p>' +
 '<ul><li>20% na assinatura (sinal).</li><li>80% até 24 horas antes da realização do evento.</li></ul>' +
 '<h3>Parágrafo Primeiro</h3>' +
@@ -1177,7 +1189,7 @@ function gerarContratoCasamento(d) {
 '<p>O Espaço Kids destina-se à recreação coletiva, priorizando a interação e segurança das crianças. Crianças a partir de 4 (quatro) anos poderão permanecer desacompanhadas. Para menores de 4 (quatro) anos ou crianças que necessitem de acompanhamento individual, será obrigatória a permanência de um responsável próximo durante todo o período. Ressalta-se que a equipe não realiza atendimentos individualizados, sendo as atividades conduzidas de forma coletiva.</p>' +
 
 '<h2>Cláusula Quinta – Da Remuneração</h2>' +
-'<p>O valor total dos serviços é de <strong>R$ ' + d.valorTotal + '</strong> (' + d.valorExtenso + '), incluindo R$ ' + d.taxa + ' de taxa de locomoção.</p>' +
+'<p>O valor total dos serviços é de <strong>R$ ' + d.valorTotal + '</strong> (' + d.valorExtenso + '), incluindo R$ ' + d.taxa + ' de taxa de locomoção.' + d.descontoTxt + '</p>' +
 '<p>Forma de pagamento:</p>' +
 '<ul><li>20% na assinatura (sinal).</li><li>80% até 24 horas antes da realização do evento.</li></ul>' +
 '<h3>Parágrafo Primeiro</h3>' +
@@ -1228,6 +1240,7 @@ function montarContrato() {
     valorTotal: totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     valorExtenso: valorPorExtenso(totalGeral),
     taxa: (window.taxaAtual || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    descontoTxt: (window.descontoAtual || 0) > 0 ? (' Já com desconto de R$ ' + window.descontoAtual.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' aplicado.') : '',
     dataAssinatura: dataAssinaturaExtenso()
   };
   var html = tipo === 'casamento' ? gerarContratoCasamento(d) : gerarContratoAniversario(d);
@@ -1293,6 +1306,7 @@ document.getElementById('gerarLinkBtn').addEventListener('click', function () {
     atividades: pacotesSelecionados,
     valorTotal: totalGeral,
     taxa: window.taxaAtual || 0,
+    desconto: window.descontoAtual || 0,
     dataAssinatura: dataAssinaturaExtenso()
   };
   var encoded = b64EncodeUnicode(JSON.stringify(payload));
@@ -1396,6 +1410,7 @@ function mostrarModoCliente(payload) {
     valorTotal: (payload.valorTotal || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     valorExtenso: valorPorExtenso(payload.valorTotal || 0),
     taxa: (payload.taxa || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    descontoTxt: (payload.desconto || 0) > 0 ? (' Já com desconto de R$ ' + (payload.desconto || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' aplicado.') : '',
     dataAssinatura: payload.dataAssinatura || dataAssinaturaExtenso()
   };
 
@@ -1439,7 +1454,8 @@ function mostrarModoCliente(payload) {
       duracao: payload.duracao,
       recreadores: payload.recreadores,
       valorTotal: payload.valorTotal,
-      taxa: payload.taxa
+      taxa: payload.taxa,
+      desconto: payload.desconto || 0
     });
 
     var tel = '5512992264586'; // WhatsApp da Recrear-se
